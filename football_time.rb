@@ -15,7 +15,42 @@ bristol_score = 0
 exeter_score = 0
 barnet_score = 0
 
+#USER INPUT
+
+puts "Welcome to football tracker, enter the BBC Sport games you would like to track today with copy paste, then hit enter. When you are happy, start the program by entering 'GO' then enter again"
+
+start_program = nil
+links = []
+
+while start_program != 'GO'
+
+  new_link = gets.chomp
+  if new_link == 'GO'
+    start_program = 'GO'
+  else
+    links << new_link
+  end
+  puts "Another link? \n"
+
+end
+
+#PRE LOOP SETUP CODE GOES IN HERE TO ESTABLISH EXISTING VARIABLES IN A HASH
+
+#FUNCTIONALITY
+
 while true
+
+  links.each do |link|
+
+    a=Mechanize.new
+    a=a.get(link)
+
+
+
+  end
+
+
+end
 
 	#OXFORD UNITED
 	puts "Now checking Oxford!"
