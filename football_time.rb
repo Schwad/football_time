@@ -1,28 +1,19 @@
-require "win32/sound"
 require "mechanize"
-require "watir-webdriver"
-include Win32
+require "pry"
 
+#This is the mac version.
 
-puts "hello_world"
-
-oxford_score = 0
-stevenage_score = 0
-plymouth_score = 0
-morecambe_score = 0
-cambridge_score = 0
-bristol_score = 0
-exeter_score = 0
-barnet_score = 0
+`say This program will behave correctly if you send it the appropriate style BBC link copied directly from the game page. In future we hope to have it take in all games on a specified page.`
 
 #USER INPUT
 
-puts "Welcome to football tracker, enter the BBC Sport games you would like to track today with copy paste, then hit enter. When you are happy, start the program by entering 'GO' then enter again"
+puts "Welcome to football tracker, enter the BBC Sport games you would like to track today with copy paste, then hit enter. \n\nWhen you are happy, start the program by entering 'GO' then enter again"
 
 start_program = nil
 links = []
 
 while start_program != 'GO'
+  puts "Another link? \n"
 
   new_link = gets.chomp
   if new_link == 'GO'
@@ -30,171 +21,47 @@ while start_program != 'GO'
   else
     links << new_link
   end
-  puts "Another link? \n"
 
 end
 
+def play_my_audio(team_one, team_one_score, team_two, team_two_score)
+  puts "HIT! #{team_one}"
+  `say Attention, we have a new score update from #{team_one}`
+  sleep 1.5
+  `say #{team_one} #{team_one_score}, #{team_two} #{team_two_score}`
+end
+
 #PRE LOOP SETUP CODE GOES IN HERE TO ESTABLISH EXISTING VARIABLES IN A HASH
+all_games = Hash.new
+counter = 0
+links.each do |link|
+  a=Mechanize.new
+  a=a.get(link)
+  home_team = a.search("span.fixture__team-name--home")[0].text
+  away_team = a.search("span.fixture__team-name--away")[0].text
+  all_games[counter] = Hash.new
+  all_games[counter]["home_team"] = 0
+  all_games[counter]["away_team"] = 0
+  all_games[counter]["home_team_name"] = home_team
+  all_games[counter]["away_team_name"] = away_team
+  all_games[counter]["main_link"] = link
+  counter += 1
+end
 
 #FUNCTIONALITY
 
 while true
 
-  links.each do |link|
-
+  all_games.keys.each do |key|
+    puts "Now checking #{all_games[key]["home_team_name"]} vs #{all_games[key]["away_team_name"]}"
     a=Mechanize.new
-    a=a.get(link)
-
-
-
+    a=a.get(all_games[key]["main_link"])
+    if a.search("span.fixture__number--home")[0].text.to_i != all_games[key]["home_team"]
+      all_games[key]["home_team"] = a.search("span.fixture__number--home")[0].text.to_i
+      play_my_audio(all_games[key]["home_team_name"], all_games[key]["home_team"], all_games[key]["away_team_name"], all_games[key]["away_team"])
+    elsif a.search("span.fixture__number--away")[0].text.to_i != all_games[key]["away_team"]
+      all_games[key]["away_team"] = a.search("span.fixture__number--home")[0].text.to_i
+      play_my_audio(all_games[key]["home_team_name"], all_games[key]["home_team"], all_games[key]["away_team_name"], all_games[key]["away_team"])
+    end
   end
-
-
 end
-
-	#OXFORD UNITED
-	puts "Now checking Oxford!"
-
-#scrape
-	a=Mechanize.new
-	a=a.get("http://www.bbc.co.uk/sport/football/35839149")
-	if a.search("span.fixture__number--home")[0].text.to_i != oxford_score
-		Sound.beep(700, 4000)
-		sleep 1
-		Sound.play("Schwad.wav")
-		oxford_score = a.search("span.fixture__number--home")[0].text.to_i
-		browser = Watir::Browser.new :firefox # should open a new Firefox window
-		browser.goto "http://www.readspeaker.com/voice-demo/" # or type the local path to your downloaded copy
-		browser.select_list(:id => "voice-demo-lang").select "English (American) - male"
-		# browser.text_field(:id => "my_text_field").set "Yes!"
-		browser.textarea(:id => "voice-demo-text").set "Oxford #{oxford_score}, Stevenage #{stevenage_score}"
-		browser.input(:id => "voice-demo-submit").click
-	elsif a.search("span.fixture__number--away")[0].text.to_i != stevenage_score
-		Sound.beep(700, 4000)
-		sleep 1
-		Sound.play("Schwad.wav")
-		stevenage_score = a.search("span.fixture__number--away")[0].text.to_i
-		browser = Watir::Browser.new :firefox # should open a new Firefox window
-		browser.goto "http://www.readspeaker.com/voice-demo/" # or type the local path to your downloaded copy
-		browser.select_list(:id => "voice-demo-lang").select "English (American) - male"
-		# browser.text_field(:id => "my_text_field").set "Yes!"
-		browser.textarea(:id => "voice-demo-text").set "Oxford #{oxford_score}, Stevenage #{stevenage_score}"
-		browser.input(:id => "voice-demo-submit").click
-	end
-
-	#PLYMOUTH GAME
-	puts "Now checking Plymouth!"
-	a=Mechanize.new
-	a=a.get("http://www.bbc.co.uk/sport/football/35839152")
-	if a.search("span.fixture__number--home")[0].text.to_i != morecambe_score
-		Sound.beep(700, 4000)
-		sleep 1
-		Sound.play("Schwad.wav")
-		morecambe_score = a.search("span.fixture__number--home")[0].text.to_i
-		browser = Watir::Browser.new :firefox # should open a new Firefox window
-		browser.goto "http://www.readspeaker.com/voice-demo/" # or type the local path to your downloaded copy
-		browser.select_list(:id => "voice-demo-lang").select "English (American) - male"
-		# browser.text_field(:id => "my_text_field").set "Yes!"
-		browser.textarea(:id => "voice-demo-text").set "Plymouth #{plymouth_score}, Morecambe #{morecambe_score}"
-		browser.input(:id => "voice-demo-submit").click
-	elsif a.search("span.fixture__number--away")[0].text.to_i != plymouth_score
-		Sound.beep(700, 4000)
-		sleep 1
-		Sound.play("Schwad.wav")
-		plymouth_score = a.search("span.fixture__number--away")[0].text.to_i
-		browser = Watir::Browser.new :firefox # should open a new Firefox window
-		browser.goto "http://www.readspeaker.com/voice-demo/" # or type the local path to your downloaded copy
-		browser.select_list(:id => "voice-demo-lang").select "English (American) - male"
-		# browser.text_field(:id => "my_text_field").set "Yes!"
-		browser.textarea(:id => "voice-demo-text").set "Plymouth #{plymouth_score}, Morecambe #{morecambe_score}"
-		browser.input(:id => "voice-demo-submit").click
-	end
-
-	puts "Now Checking Bristol!"
-	#Bristol Rovers
-	a=Mechanize.new
-	a=a.get("http://www.bbc.co.uk/sport/football/35839205")
-	if a.search("span.fixture__number--home")[0].text.to_i != bristol_score
-		Sound.beep(700, 4000)
-		sleep 1
-		Sound.play("Schwad.wav")
-		bristol_score = a.search("span.fixture__number--home")[0].text.to_i
-		browser = Watir::Browser.new :firefox # should open a new Firefox window
-		browser.goto "http://www.readspeaker.com/voice-demo/" # or type the local path to your downloaded copy
-		browser.select_list(:id => "voice-demo-lang").select "English (American) - male"
-		# browser.text_field(:id => "my_text_field").set "Yes!"
-		browser.textarea(:id => "voice-demo-text").set "Bristol #{bristol_score}, Cambridge #{cambridge_score}"
-		browser.input(:id => "voice-demo-submit").click
-	elsif a.search("span.fixture__number--away")[0].text.to_i != cambridge_score
-		Sound.beep(700, 4000)
-		sleep 1
-		Sound.play("Schwad.wav")
-		cambridge_score = a.search("span.fixture__number--away")[0].text.to_i
-		browser = Watir::Browser.new :firefox # should open a new Firefox window
-		browser.goto "http://www.readspeaker.com/voice-demo/" # or type the local path to your downloaded copy
-		browser.select_list(:id => "voice-demo-lang").select "English (American) - male"
-		# browser.text_field(:id => "my_text_field").set "Yes!"
-		browser.textarea(:id => "voice-demo-text").set "Bristol #{bristol_score}, Cambridge #{cambridge_score}"
-		browser.input(:id => "voice-demo-submit").click
-	end
-
-	puts "Now Checking Exeter!"
-	#Bristol Rovers
-	a=Mechanize.new
-	a=a.get("http://www.bbc.co.uk/sport/football/35839181")
-	if a.search("span.fixture__number--home")[0].text.to_i != exeter_score
-		Sound.beep(700, 4000)
-		sleep 1
-		Sound.play("Schwad.wav")
-		exeter_score = a.search("span.fixture__number--home")[0].text.to_i
-		browser = Watir::Browser.new :firefox # should open a new Firefox window
-		browser.goto "http://www.readspeaker.com/voice-demo/" # or type the local path to your downloaded copy
-		browser.select_list(:id => "voice-demo-lang").select "English (American) - male"
-		# browser.text_field(:id => "my_text_field").set "Yes!"
-		browser.textarea(:id => "voice-demo-text").set "Exeter #{exeter_score}, Barnet #{barnet_score}"
-		browser.input(:id => "voice-demo-submit").click
-	elsif a.search("span.fixture__number--away")[0].text.to_i != barnet_score
-		Sound.beep(700, 4000)
-		sleep 1
-		Sound.play("Schwad.wav")
-		barnet_score = a.search("span.fixture__number--away")[0].text.to_i
-		browser = Watir::Browser.new :firefox # should open a new Firefox window
-		browser.goto "http://www.readspeaker.com/voice-demo/" # or type the local path to your downloaded copy
-		browser.select_list(:id => "voice-demo-lang").select "English (American) - male"
-		# browser.text_field(:id => "my_text_field").set "Yes!"
-		browser.textarea(:id => "voice-demo-text").set "Exeter #{exeter_score}, Barnet #{barnet_score}"
-		browser.input(:id => "voice-demo-submit").click
-	end
-
-
-	sleep 10
-end
-
-# a=Mechanize.new
-# a=a.get("http://www.bbc.co.uk/sport/football/35839149")
-# browser = Watir::Browser.new :firefox # should open a new Firefox window
-# browser.goto "http://www.readspeaker.com/voice-demo/" # or type the local path to your downloaded copy
-# browser.select_list(:id => "voice-demo-lang").select "English (American) - male"
-# # browser.text_field(:id => "my_text_field").set "Yes!"
-# browser.textarea(:id => "voice-demo-text").set "Plymouth 1, Bristol Nil"
-# browser.input(:id => "voice-demo-submit").click
-
-# sleep 2 # puts the entire program to sleep for 2 seconds, so you can see the change
-# browser.radio(:name => "familiar_rails", :value => "1").click # yes, I"m very familiar
-# browser.radio(:name => "familiar_rails", :value => "3").click # actually, just a bit...
-
-# browser.text_field(:name => "favorite_1").set "Yukihiro" # the creator of Ruby
-# browser.text_field(:id => "favorite_2").set "Matsumoto" # is my favorite Ruby person!
-
-# browser.checkbox(:index => 1).click # I like the TDD culture
-# browser.checkbox(:index => 2).click # And Matz!
-# sleep 2 # puts the entire program to sleep for 2 seconds, so you can see the change
-# browser.checkbox(:index => 1).click # Oh well, I like only Matz..
-
-
-# browser.select_list(:id => "usage").select_value "2" # Changed my mind
-
-# # Here I entered C:/watir.txt because I had such a file inside my C: directory. Please be sure
-# # to enter a valid path to a file, or your script will report "No such file or directory" error
-# browser.file_field.set "C:/watir.txt" # Change this path to any path to a local file on your computer
-# puts browser.p(:id => "my_description").text
